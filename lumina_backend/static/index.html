@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LUMINA — Exoplanet Console</title>
+<style>
+:root{--line:#1b3442;--tx:#e3eef2;--mut:#8fa6b3;--cy:#4fd1e0;--ok:#7be0b0;--bad:#ff7a8a;color-scheme:dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}body{margin:0;background:#050912;color:var(--tx);font:14px/1.5 Calibri,"Segoe UI",system-ui,sans-serif;min-height:100vh}
+#bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 15% 20%,rgba(60,90,200,.38),transparent 45%),radial-gradient(ellipse at 85% 70%,rgba(120,60,170,.32),transparent 50%),radial-gradient(ellipse at 50% 100%,rgba(20,90,120,.38),transparent 55%),#050912}
+body.has-bg #bg{background:url(img/bg.jpg) center/cover no-repeat}#bg:after{content:"";position:absolute;inset:0;background:rgba(4,8,16,.3)}
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none;width:100%}
+main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:14px 16px 50px}
+.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:6px 4px 14px;font-size:13px;color:#b9cbd6}
+.top .r{text-align:right}.logo{font:300 26px Cambria,serif;letter-spacing:.45em;color:#a9d8e2;text-shadow:0 0 18px rgba(79,209,224,.35)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--cy);box-shadow:0 0 8px var(--cy);margin-left:6px}
+.cols{display:grid;grid-template-columns:1.6fr 1fr;gap:14px}@media(max-width:760px){.cols,.row2{grid-template-columns:1fr!important}}
+.p{background:linear-gradient(180deg,rgba(12,28,46,.8),rgba(6,14,26,.88));border:1px solid rgba(110,190,230,.3);border-radius:10px;padding:12px 14px;margin-bottom:14px;box-shadow:inset 0 0 24px rgba(40,120,200,.1),0 6px 26px rgba(0,0,0,.4)}
+.p h2{font:400 14px Cambria,serif;margin:0 0 6px;color:#d3e8f0}.mono{font:11px "Courier New",monospace;letter-spacing:.08em;color:var(--mut);text-transform:uppercase}
+.hero h1{font:400 clamp(24px,3.2vw,34px) Cambria,Georgia,serif;margin:4px 0 6px;text-shadow:0 2px 20px rgba(0,0,0,.7)}.hero p{margin:0 0 12px;color:#c3d3dc;max-width:560px}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,.btn,select,input[type=text]{background:rgba(255,255,255,.05);color:#d9eef5;border:1px solid rgba(160,210,235,.4);padding:7px 12px;border-radius:6px;font:inherit;font-size:13px;cursor:pointer}
+button.go{background:linear-gradient(#2a8fb4,#16688c);border-color:#5fd4e8;color:#fff;box-shadow:0 0 14px rgba(56,182,216,.4)}button:disabled{opacity:.4;cursor:default}
+input[type=file]{display:none}input[type=text]{width:100px;cursor:text}select{min-width:190px}
+.stat{margin-top:10px;display:flex;gap:10px;align-items:center}.bar0{flex:1;height:22px;border:1px solid rgba(110,190,230,.4);border-radius:5px;background:rgba(8,20,36,.7);position:relative;overflow:hidden}
+.bar0 i{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,#2a8fb4,#6fe0f0);opacity:.55;transition:width .6s}.bar0 span{position:relative;padding:0 10px;line-height:20px;font-size:13px}
+.badge{font-size:11px;border:1px solid #38b6d8;border-radius:12px;padding:1px 10px;color:#bfeaf3;white-space:nowrap}.badge.rep{border-color:#d9b36a;color:#ecd9a8}
+canvas{width:100%;display:block}.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.kv{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:4px 0;font-size:13px}.kv span:first-child{color:var(--mut)}
+.big{text-align:center;padding:6px 0 10px}.big b{display:block;font:400 clamp(24px,3vw,34px) Cambria,serif;letter-spacing:.06em;color:#a8dbe6;text-shadow:0 0 14px rgba(79,209,224,.35)}.big.no b{color:#e8c98a;text-shadow:none}
+.big em{font-style:normal;color:#b9cbd6}.cb{margin:6px 0}.cb .r{display:flex;justify-content:space-between;font-size:12px}.cb .t{height:6px;background:#12263a;border-radius:3px;overflow:hidden}.cb .t i{display:block;height:100%;width:0;background:#4fb8d6;transition:width 1.1s}.cb.top .t i{background:#6fc4d6}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:4px 3px;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:400;font-size:11px}
+.note{font-size:11.5px;color:var(--mut);margin-top:6px}.warn{color:#ecd9a8}.lock{color:var(--mut);padding:14px 0}
+.hb{height:6px;background:#12263a;border-radius:3px;margin-top:4px}.hb i{display:block;height:100%;background:#7be0b0;border-radius:3px}
+button,.btn,select,input[type=text]{font:12px "Courier New",monospace;letter-spacing:.1em;text-transform:uppercase;padding:9px 14px;border-radius:8px}
+button.go{box-shadow:0 0 22px rgba(79,209,224,.55)}
+.bar0{height:2px;border:0;border-radius:0;background:rgba(110,190,230,.2);margin-top:16px;overflow:visible}.bar0 i{opacity:1;background:#4fd1e0;box-shadow:0 0 8px #4fd1e0}
+.mono2{font:12px "Courier New",monospace;color:#b9cbd6;margin-top:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+</style></head><body><div id="bg"></div><canvas id="stars"></canvas><main>
+<div class="top"><span>exoplanet console<span class="dot"></span></span><span class="logo">LUMINA</span><span class="r">Kepler · TESS · Ariel</span></div>
+<div class="cols"><div>
+ <div class="p hero"><div class="mono">Exoplanet detection</div><h1>Searching for worlds hidden in stellar noise.</h1>
+  <p>A planet crosses its star → the light dips → we find the pattern. Lumina reads the light curve, classifies the signal, then reads the planet’s atmosphere.</p>
+  <div class="ctl"><select id="sel"></select><button class="go" id="run" disabled>Begin analysis</button><label class="btn" for="jf">Load report JSON</label><input id="jf" type="file" accept=".json" multiple><button id="dl" disabled>Download report</button><input type="text" id="lid" placeholder="Live ID"><button id="lv">Live</button></div>
+  <div class="bar0"><i id="pf"></i></div><div class="mono2"><span id="px">Ready.</span><span class="badge" id="badge">no data</span></div><div class="note" id="exn"></div></div>
+ <div class="p"><h2>Phase-folded curve</h2><div class="mono">Global view · 2001 bins · phase −0.5 to +0.5</div><canvas id="c2" height="130"></canvas></div>
+ <div class="row2"><div class="p"><h2>Transit, local view</h2><div class="mono">201 bins · centred on transit</div><canvas id="c1" height="120"></canvas></div>
+  <div class="p"><h2>Model inputs</h2><div class="mono">Values as stored in the feature record</div><div id="sc" style="margin-top:6px"></div></div></div>
+ <div class="p"><h2>Atmospheric characterization</h2><div class="mono">Ariel-style spectrum · unlocks when Stage 1 confirms a planet</div>
+  <div class="row2" style="margin-top:8px"><div><canvas id="c5" height="150"></canvas><div id="upl" style="display:none;margin-top:8px"><label class="btn" for="sf">Upload spectrum CSV</label><input id="sf" type="file" accept=".csv,.txt"><div class="note">Columns: wavelength, depth, noise[, width]</div></div></div>
+  <div id="s2b"><div class="lock">🔒 Awaiting planet confirmation</div></div></div></div>
+</div><div>
+ <div class="p"><h2>Stellar system</h2><canvas id="sys2" height="320"></canvas><div class="note" id="simnote">Schematic · idle until a planet is confirmed.</div></div>
+ <div class="p"><div style="display:flex;justify-content:space-between"><h2>Classification report</h2><span class="mono">v18</span></div>
+  <div class="big" id="big"><b>—</b><em>awaiting analysis</em></div><div id="bars"></div><div class="sg" id="stats"></div><div class="note" id="s1note"></div></div>
+</div></div></main>
+<script>
+const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(()=>{const c=$('stars'),x=c.getContext('2d'),W=c.width=innerWidth,H=c.height=innerHeight;for(let i=0;i<220;i++){x.fillStyle=`rgba(210,225,255,${.12+Math.random()*.5})`;x.beginPath();x.arc(Math.random()*W,Math.random()*H,(Math.random()**3*2+.4)*.7,0,7);x.fill()}})();
+const DATA=[];let cur=null,proc=null,P=4.2;const GATE=.6;
+const EX=(()=>{const rn=i=>{const x=Math.sin(i*12.9898)*43758.5453;return x-Math.floor(x)-.5};
+const loc=Array.from({length:201},(_,i)=>{const t=(i-100)/100,d=Math.abs(t)<.2?1:Math.abs(t)<.3?(.3-Math.abs(t))/.1:0;return -1.2*d+.08*rn(i)});
+const glo=Array.from({length:2001},(_,i)=>{const t=(i-1000)/1000;return -1.2*(Math.abs(t)<.01?1:0)+.1*rn(i+500)});
+return{source:'example',pipe_output:{target:'EXAMPLE · 6707835',stage1:{label:'Planet',confidence:.8008,probs:{Planet:.8008,'Eclipsing Binary':.0302,Blend:.0295,Artifact:.1395}},stage2:null,true_label:'Planet',note:'Planet confirmed but no spectrum supplied - Stage 2 skipped.'},record:{local_view:loc,global_view:glo}}})();
+DATA.push(EX);
+const NM={temperature_K:'Temperature (K)',log_H2O:'log H₂O',log_CO2:'log CO₂',log_CO:'log CO',log_CH4:'log CH₄',log_NH3:'log NH₃'};
+const f=(v,n=3)=>v==null||isNaN(v)?'—':(+v).toFixed(n);
+function prog(p,t){$('pf').style.width=p+'%';$('px').textContent=t}
+function blank(id,t){const c=$(id),W=c.width=c.clientWidth*2,H=c.height=(c.dataset.h||(c.dataset.h=c.getAttribute('height')))*2,g=c.getContext('2d');g.clearRect(0,0,W,H);g.strokeStyle='#1b3442';g.strokeRect(1,1,W-2,H-2);g.fillStyle='#5a7482';g.font='22px Calibri';g.textAlign='center';g.fillText(t,W/2,H/2)}
+function fill(sel=0){$('sel').innerHTML=DATA.length?DATA.map((d,i)=>`<option value="${i}">${d.pipe_output.target}${d.source==='live'?' · live':''}</option>`).join(''):'<option>No targets loaded</option>';$('sel').value=sel;$('run').disabled=!DATA.length;prog(0,DATA.length?DATA.length+' target(s) loaded. Press Begin analysis.':'Ready. Load report JSON files.')}
+async function loadRecorded(){for(let i=1;i<=12;i++){try{const r=await fetch('recorded_outputs/target_'+String(i).padStart(2,'0')+'.json');if(!r.ok)break;DATA.push(await r.json())}catch(e){break}}fill()}
+$('jf').onchange=async e=>{for(const x of e.target.files){try{DATA.push(JSON.parse(await x.text()))}catch(_){prog(0,'Could not read '+x.name)}}fill(DATA.length-1)};
+$('lv').onclick=async()=>{const id=$('lid').value.trim();if(!id)return;prog(10,'Contacting live server…');try{const r=await fetch('/predict?target='+encodeURIComponent(id),{signal:AbortSignal.timeout(25000)});if(!r.ok)throw 0;const d=await r.json();d.source='live';DATA.unshift(d);fill(0);show(d)}catch(e){prog(0,'Live server not reachable — recorded outputs only.')}};
+$('dl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(cur,null,1)],{type:'application/json'}));a.download='lumina_report_'+cur.pipe_output.target+'.json';a.click()};
+function plot(id,xs,ys,o={}){const c=$(id),W=c.width=c.clientWidth*2,H=c.height=(c.dataset.h||(c.dataset.h=c.getAttribute('height')))*2,g=c.getContext('2d');g.clearRect(0,0,W,H);
+ const xm=Math.min(...xs),xM=Math.max(...xs);let a=Math.min(...ys),b=Math.max(...ys);const pd=(b-a)*.08||1e-3;a-=pd;b+=pd;
+ const X=v=>50+(v-xm)/(xM-xm||1)*(W-70),Y=v=>H-30-(v-a)/(b-a)*(H-46);g.strokeStyle='#1b3442';g.fillStyle='#8fa6b3';g.font='19px Calibri';g.lineWidth=1;
+ for(let i=0;i<=3;i++){const v=a+(b-a)*i/3,y=Y(v);g.beginPath();g.moveTo(50,y);g.lineTo(W-20,y);g.stroke();g.fillText(v.toFixed(o.d??3),2,y+6)}
+ g.fillText(o.lab||'',W-20-g.measureText(o.lab||'').width,H-6);
+ if(o.err){g.strokeStyle='rgba(127,212,230,.3)';o.err.forEach((e,i)=>{g.beginPath();g.moveTo(X(xs[i]),Y(ys[i]-e));g.lineTo(X(xs[i]),Y(ys[i]+e));g.stroke()})}
+ if(o.pts){g.fillStyle='rgba(120,170,190,.7)';xs.forEach((v,i)=>g.fillRect(X(v)-1.2,Y(ys[i])-1.2,2.4,2.4));const nb=80,s=Array(nb).fill(0),n=Array(nb).fill(0);xs.forEach((v,i)=>{const k=Math.min(nb-1,Math.floor((v-xm)/(xM-xm||1)*nb));s[k]+=ys[i];n[k]++});g.strokeStyle='rgba(240,214,150,.95)';g.lineWidth=2.2;g.beginPath();let st=0;s.forEach((v,k)=>{if(!n[k])return;const x=X(xm+(k+.5)/nb*(xM-xm)),y=Y(v/n[k]);st++?g.lineTo(x,y):g.moveTo(x,y)});g.stroke()}else{g.strokeStyle='#79b9c9';g.lineWidth=1.8;g.beginPath();xs.forEach((v,i)=>i?g.lineTo(X(v),Y(ys[i])):g.moveTo(X(v),Y(ys[i])));g.stroke()}}
+function stage2(d){const o=d.pipe_output,s=o.stage1,gate=s.label==='Planet'&&s.confidence>=GATE,st=o.stage2,b=$('s2b');$('upl').style.display=gate?'block':'none';
+ if(!gate){b.innerHTML=`<div class="lock">🔒 Awaiting planet confirmation<div class="note">${o.note||''}</div></div>`;blank('c5','Locked');return}
+ if(!st){b.innerHTML=`<div style="color:var(--ok)">✓ Planet confirmed — Stage 2 unlocked</div><div class="note">${o.note||''}</div>`;blank('c5','No spectrum supplied');return}
+ const tr=st.truth_for_demo_spectrum,h=st.habitability;
+ b.innerHTML=`<table><tr><th>Parameter</th><th>Predicted</th><th>± unverified</th>${tr?'<th>Demo truth</th>':''}</tr>`+Object.keys(st.params).map(k=>`<tr><td>${NM[k]||k}</td><td>${f(st.params[k])}</td><td>${f(st.uncertainty[k])}</td>${tr?`<td>${f(tr[k])}</td>`:''}</tr>`).join('')+`</table>
+ <div class="kv" style="margin-top:8px"><span>Habitability indicator</span><span>${h?h.score:'—'}</span></div><div class="hb"><i style="width:${(h?h.score:0)*100}%"></i></div>
+ <div class="note">Rule-based heuristic from predicted values, not a trained output.</div><div class="note warn">${o.note||''}</div>
+ <div class="note"><b>Accuracy (200 test spectra):</b> ≈150 K mean error on temperature, 0.4–0.7 dex on abundances. The ± values are not calibrated (temperature ±1σ held the truth only 12% of the time).</div>`;
+ if(d.spectrum&&d.spectrum.wavelength)plot('c5',d.spectrum.wavelength,d.spectrum.depth,{lab:'wavelength',d:5,err:d.spectrum.noise});else blank('c5','No spectrum plotted')}
+async function show(d){cur=d;const o=d.pipe_output,s=o.stage1,r=d.record||{},gate=s.label==='Planet'&&s.confidence>=GATE,live=d.source==='live';
+ $('run').disabled=true;$('dl').disabled=true;const ex=d.source==='example';$('badge').textContent=live?'LIVE ANALYSIS':ex?'EXAMPLE · views illustrative':'RECORDED v18 OUTPUT · REPLAYED';$('badge').className='badge'+(live?'':' rep');$('exn').textContent=ex?'Example: class scores are the real v18 output for target 6707835; the transit views are illustrative only. Load report JSON for real views.':'';
+ prog(10,'Loading target record…');await sleep(450);
+ if(r.global_view)plot('c2',r.global_view.map((_,i)=>i/(r.global_view.length-1)-.5),r.global_view,{lab:'phase',pts:1});if(r.local_view)plot('c1',r.local_view.map((_,i)=>i),r.local_view,{lab:'bin'});
+ $('sc').innerHTML=[['Period',f(r.period,4)],['Epoch',f(r.epoch,3)],['Depth',f(r.depth,5)],['Duration',f(r.duration,3)],['Signal-to-noise',f(r.model_snr,1)],['Flux std',f(r.flux_std,5)]].map(k=>`<div class="kv"><span>${k[0]}</span><span>${k[1]}</span></div>`).join('');
+ prog(40,'Running Stage 1 classifier…');await sleep(700);
+ $('big').className='big'+(gate?'':' no');$('big').innerHTML=gate?`<b>PLANET CANDIDATE</b><em>${f(s.confidence*100,1)}% confidence</em>`:`<b>${s.label.toUpperCase()}</b><em>${f(s.confidence*100,1)}% confidence · no planet confirmed</em>`;
+ const mx=Math.max(...Object.values(s.probs));$('bars').innerHTML=Object.entries(s.probs).map(([k,v])=>`<div class="cb ${v==mx?'top':''}"><div class="r"><span>${k}</span><span>${f(v*100,1)}%</span></div><div class="t"><i data-w="${v*100}"></i></div></div>`).join('');
+ $('stats').innerHTML=[['Period',f(r.period,3)],['Depth',f(r.depth,5)],['Duration',f(r.duration,3)],['Signal-to-noise',f(r.model_snr,1)]].map(k=>`<div class="kv"><span>${k[0]}</span><span>${k[1]}</span></div>`).join('');
+ $('s1note').textContent=(o.true_label?'Catalogue label: '+o.true_label+' · ':'')+'values as stored in the feature record';
+ await sleep(60);document.querySelectorAll('#bars i').forEach(e=>e.style.width=e.dataset.w+'%');
+ prog(70,'Checking gate: Planet ≥ 0.60…');await sleep(600);proc={det:gate};P=r.period||4.2;$('simnote').textContent=gate?'Planet confirmed — crossing the star dips the light (schematic).':'No planet confirmed — nothing crosses the star.';
+ prog(90,gate?'Reading the atmosphere…':'Stage 2 skipped.');await sleep(500);stage2(d);
+ prog(100,'Analysis complete.');$('run').disabled=false;$('dl').disabled=false}
+$('run').onclick=()=>DATA.length&&show(DATA[+$('sel').value]);
+$('sf').onchange=async e=>{const t=await e.target.files[0].text(),w=[],dp=[],n=[],wd=[];t.split(/\r?\n/).forEach(l=>{const a=l.split(/[,\s;]+/).map(Number);if(a.length>=3&&a.slice(0,3).every(isFinite)){w.push(a[0]);dp.push(a[1]);n.push(a[2]);if(isFinite(a[3]))wd.push(a[3])}});
+ if(w.length<10)return alert('Need columns: wavelength, depth, noise[, width]');const sp={wavelength:w,depth:dp,noise:n};if(wd.length==w.length)sp.width=wd;
+ try{const r=await fetch('/stage2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({spectrum:sp,target:cur.pipe_output.target}),signal:AbortSignal.timeout(30000)});if(!r.ok)throw 0;cur.pipe_output.stage2=await r.json();cur.pipe_output.note='Spectrum supplied by the user, not measured for this target.';cur.spectrum=sp;stage2(cur)}
+ catch(x){cur.spectrum=sp;stage2(cur);prog(100,'Spectrum plotted. Running Stage 2 needs the live server.')}};
+const sc=$('sys2');let t0=performance.now();
+function frame(now){const W=sc.width=sc.clientWidth*2,H=sc.height=640,g=sc.getContext('2d');g.clearRect(0,0,W,H);
+const sp=proc&&proc.det,ph=sp?((now-t0)/(2200+P*500))%1:.05,cx=W/2,cy=170,R=54,r=13,rx=W*.36,ry=32;
+const pos=q=>{const a=q*6.283;return[rx*Math.sin(a),ry*Math.cos(a)]};
+const dipAt=q=>{if(!sp)return 0;const p=pos(q);if(p[1]<=0)return 0;const o=Math.min(1,Math.max(0,(R+r-Math.hypot(p[0],p[1]))/(2*r)));return o*o*(3-2*o)};
+g.strokeStyle='rgba(120,200,220,.3)';g.lineWidth=2;g.beginPath();g.ellipse(cx,cy,rx,ry,0,0,6.283);g.stroke();
+let gr=g.createRadialGradient(cx,cy,R*.8,cx,cy,R*3.2);gr.addColorStop(0,'rgba(255,214,150,.4)');gr.addColorStop(1,'rgba(255,214,150,0)');g.fillStyle=gr;g.fillRect(cx-R*4,cy-R*4,R*8,R*8);
+const pp=pos(ph),px=cx+pp[0],py=cy+pp[1],front=pp[1]>0;
+const planet=()=>{const dx=cx-px,dy=cy-py,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,tr=front&&Math.abs(px-cx)<R;
+g.save();g.beginPath();g.arc(px,py,r,0,7);g.clip();
+const pg=g.createRadialGradient(px+ux*r*.55,py+uy*r*.55,r*.1,px,py,r*1.25);
+if(tr){pg.addColorStop(0,'#0b141d');pg.addColorStop(1,'#05090e')}else{pg.addColorStop(0,'#9cc4dc');pg.addColorStop(.45,'#4d7f9f');pg.addColorStop(1,'#050a12')}
+g.fillStyle=pg;g.fillRect(px-r,py-r,2*r,2*r);
+if(!tr){g.strokeStyle='rgba(255,255,255,.12)';g.lineWidth=1.5;for(let k=-2;k<=2;k++){g.beginPath();g.moveTo(px-r,py+k*r*.38);g.lineTo(px+r,py+k*r*.38+2);g.stroke()}}
+g.restore();g.strokeStyle=tr?'rgba(255,200,130,.55)':'rgba(140,215,240,.5)';g.lineWidth=2;g.beginPath();g.arc(px,py,r,0,7);g.stroke()};
+if(sp&&!front)planet();
+{const t=now/1000;g.save();g.translate(cx,cy);for(let k=0;k<28;k++){const a=k*.2244+t*.03,l=R*(1.5+.6*Math.abs(Math.sin(k*2.3+t*.4)));g.fillStyle=`rgba(255,190,110,${.05+.04*Math.sin(k+t)})`;g.beginPath();g.moveTo(Math.cos(a-.05)*R*.9,Math.sin(a-.05)*R*.9);g.lineTo(Math.cos(a)*l,Math.sin(a)*l);g.lineTo(Math.cos(a+.05)*R*.9,Math.sin(a+.05)*R*.9);g.fill()}g.restore();
+gr=g.createRadialGradient(cx,cy,R*.1,cx,cy,R);gr.addColorStop(0,'#fffdf4');gr.addColorStop(.5,'#ffeab4');gr.addColorStop(.82,'#ffc267');gr.addColorStop(1,'#d9772b');g.fillStyle=gr;g.beginPath();g.arc(cx,cy,R,0,7);g.fill();
+g.save();g.beginPath();g.arc(cx,cy,R,0,7);g.clip();for(let i=0;i<90;i++){const a=i*2.399+t*.02,d=R*Math.sqrt(((i*53)%100)/100)*.97,s=2+(i%4);g.fillStyle=i%3?'rgba(255,250,225,.16)':'rgba(170,80,20,.12)';g.beginPath();g.arc(cx+d*Math.cos(a),cy+d*Math.sin(a),s,0,7);g.fill()}
+g.fillStyle='rgba(120,50,10,.35)';g.beginPath();g.ellipse(cx-R*.3,cy+R*.2,6,4,.4,0,7);g.fill();g.beginPath();g.ellipse(cx+R*.35,cy-R*.25,4,3,-.3,0,7);g.fill();g.restore()}
+if(sp&&front)planet();
+const gx=30,gw=W-60,gy=350,gh=230,Y=d=>gy+gh*.25+d*gh*.5;
+g.fillStyle='rgba(8,20,30,.4)';g.fillRect(gx,gy,gw,gh);g.strokeStyle='rgba(120,200,220,.12)';g.lineWidth=1;
+for(let i=0;i<=4;i++){g.beginPath();g.moveTo(gx,gy+gh*i/4);g.lineTo(gx+gw,gy+gh*i/4);g.stroke()}for(let i=0;i<=8;i++){g.beginPath();g.moveTo(gx+gw*i/8,gy);g.lineTo(gx+gw*i/8,gy+gh);g.stroke()}
+g.strokeStyle='rgba(120,200,220,.3)';g.strokeRect(gx,gy,gw,gh);g.fillStyle='#8fa6b3';g.font='20px Calibri';g.fillText('relative brightness',gx+6,gy-10);
+const trace=()=>{g.beginPath();for(let i=0;i<=240;i++){const X=gx+gw*i/240,y=Y(dipAt(i/240));i?g.lineTo(X,y):g.moveTo(X,y)}};
+trace();g.strokeStyle='#8fc6d4';g.lineWidth=3;g.shadowColor='#4fd1e0';g.shadowBlur=6;g.stroke();
+g.fillStyle='#e8fafd';g.beginPath();g.arc(gx+ph*gw,Y(dipAt(ph)),8,0,7);g.fill();g.shadowBlur=0;requestAnimationFrame(frame)}
+requestAnimationFrame(frame);['c1','c2','c5'].forEach(i=>blank(i,'awaiting analysis'));loadRecorded().then(()=>{const k=DATA.length>1?1:0;$('sel').value=k;show(DATA[k])});
+{const i=new Image();i.onload=()=>document.body.classList.add('has-bg');i.src='img/bg.jpg'}
+</script></body></html>
